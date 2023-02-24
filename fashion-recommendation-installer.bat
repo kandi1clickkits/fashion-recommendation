@@ -147,22 +147,39 @@ IF EXIST !WORKING_DIR!\%EXTRACTED_REPO_DIR%\ (
 	 TITLE Installing %KIT_NAME% kit 100%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ) ELSE (
-    bitsadmin /transfer repo_download_job /download /priority foreground %REPO_DOWNLOAD_URL% "!WORKING_DIR!\%REPO_NAME%" >> !WORKING_DIR!\log.txt 2>&1
-	 CALL :LOG "Repo downloaded successfully"
-	 TITLE Installing %KIT_NAME% kit 80%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx____________________
-    timeout 1  >nul
+    	bitsadmin /transfer repo_download_job /download /priority foreground %REPO_DOWNLOAD_URL% "!WORKING_DIR!\%REPO_NAME%" >> !WORKING_DIR!\log.txt 2>&1
+	CALL :LOG "Repo downloaded successfully"
+	TITLE Installing %KIT_NAME% kit 80%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx____________________
+    	timeout 1  >nul
 	for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
 	<nul set/p"=->!CR!"
 	ECHO 4. Repo installed
-    CALL :LOG "Extracting the repo ..."
-    tar -xvf %REPO_NAME% >> !WORKING_DIR!\log.txt 2>&1
-    TITLE Installing %KIT_NAME% kit 100%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    timeout 1  >nul
+    	CALL :LOG "Extracting the repo ..."
+    	tar -xvf %REPO_NAME% >> !WORKING_DIR!\log.txt 2>&1
+    	TITLE Installing %KIT_NAME% kit 90%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx__________
+	CALL :Download_image
+    	TITLE Installing %KIT_NAME% kit 100%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    	timeout 1  >nul
 	for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
 	<nul set/p"=->!CR!"
 	ECHO 5. Repo extracted
 )
 EXIT /B 0	
+
+:Download_image
+CALL :LOG "Downloading Image source ... "
+cd %EXTRACTED_REPO_DIR%
+REM bitsadmin /transfer python_download_job /download  https://kandi.dev/owassets/kandi1clickkits-model-assets/fashion-model-data.zip "%cd%\fashion-model-data.zip"
+curl https://kandi.dev/owassets/kandi1clickkits-model-assets/fashion-model-data.zip --output fashion-model-data.zip >> !WORKING_DIR!\log.txt 2>&1
+IF ERRORLEVEL 1 (
+	CALL :LOG "Error with Downloading Image source ... "
+    	EXIT /B 1
+)
+tar -xvf "fashion-model-data.zip" >> !WORKING_DIR!\log.txt 2>&1
+del fashion-model-data.zip
+cd ..
+CALL :LOG "Image model and images downloaded from source"
+EXIT /B 0
 
 :Install_python_and_modules
 CALL :LOG "Downloading python %PY_VERSION% ... "
