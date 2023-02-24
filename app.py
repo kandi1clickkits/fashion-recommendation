@@ -24,6 +24,7 @@ def recommendText():
 
 @app.route("/recommend/image", methods=["GET", "POST"])
 @cross_origin()
+def recommendImg():
     if request.method == "POST":
         data = request.data
         search_item = literal_eval(data.decode('utf8'))
