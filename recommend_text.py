@@ -39,6 +39,7 @@ def recommend_similar_prods(search_item):
 
 def recommend_text(search_item):
     list_similar_prods = recommend_similar_prods(search_item)
+    list_similar_prods.reverse()
     value = str()
     for prod_id in list_similar_prods:
         title = list_prod_disp_name[list_prod_id.index(prod_id)]
