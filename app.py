@@ -18,9 +18,8 @@ def main():
 def recommendText():
     if request.method == "POST":
         data = request.data
-        #search_item = literal_eval(data.decode('utf8'))
-        #search_item = data
-        return recommend_text(data["search"])
+        search_item = literal_eval(data.decode('utf8'))
+        return recommend_text(search_item["search"])
 
 
 @app.route("/recommend/image", methods=["GET", "POST"])
