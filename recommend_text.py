@@ -11,7 +11,7 @@ from PIL import Image
 INP_FILE_PATH = "styles.csv"
 header = True
 n_rows = 20_000
-MODEL_PATH = r"models/model_fashion_text.pickle"
+MODEL_PATH = r"models/model_fashion.pickle"
 list_prod_id = list()
 list_prod_disp_name = list()
 with open(INP_FILE_PATH) as file:
@@ -24,7 +24,6 @@ with open(INP_FILE_PATH) as file:
             list_prod_id.append(row[0])
             list_prod_disp_name.append(row[9])
 list_prod_dispname = list(map(lambda x: x.strip().casefold(), list_prod_disp_name))
-# print(list_prod_disp_name[:5], list_prod_dispname[:5])
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 with open(MODEL_PATH, "rb") as file:
     text_embs = pickle.load(file)
@@ -45,7 +44,6 @@ def recommend_text(search_item):
         title = list_prod_disp_name[list_prod_id.index(prod_id)]
         data = {"title": title, "URL": os.path.abspath("images/" + prod_id + ".jpg")}
         img = Image.open(data["URL"])
-        img = img.convert('L')  # ie. convert to grayscale
         buffer = io.BytesIO()
         img.save(buffer, 'png')
         buffer.seek(0)

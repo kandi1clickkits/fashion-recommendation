@@ -8,19 +8,19 @@ ECHO 	This kit installer works only on Windows OS
 ECHO 	Based on your network speed, the installation may take a while
 ECHO======================================================================================
 SET KIT_NAME=fashion-recommendation
-REM SET WORKING_DIR=D:\work_items\kits_testing\!KIT_NAME!
 SET WORKING_DIR=C:\kandikits\!KIT_NAME!
 REM update below path if required
 REM SET PY_VERSION=3.8.10
 SET PY_VERSION=3.9.8
+REM SET PY_VERSION=3.7.4
 SET MAJOR_VERSION=%PY_VERSION:~0,1%
 SET MINOR_VERSION=%PY_VERSION:~2,1%
 SET PATCH_VERSION=%PY_VERSION:~4,2%
 SET PY_MM_VERSION=%MAJOR_VERSION%.%MINOR_VERSION%
 SET PY_LOCATION=C:\kandikits\python\%PY_VERSION%
-SET PY_DOWNLOAD_URL=https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe
+REM PY_DOWNLOAD_URL=https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe
 REM SET PY_DOWNLOAD_URL=https://www.python.org/ftp/python/3.8.10/python-%PY_VERSION%-embed-amd64.zip
-REM SET PY_DOWNLOAD_URL=https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe
+SET PY_DOWNLOAD_URL=https://www.python.org/ftp/python/%PY_VERSION%/python-%PY_VERSION%-embed-amd64.zip
 
 SET REPO_DOWNLOAD_URL=https://github.com/kandi1clickkits/fashion-recommendation/releases/download/v1.0.0/fashion-recommendation.zip
 SET REPO_DEPENDENCIES_URL=https://github.com/kandi1clickkits/fashion-recommendation/raw/main/requirements.txt
@@ -29,6 +29,7 @@ SET EXTRACTED_REPO_DIR=fashion-recommendation
 SET NOTEBOOK_NAME=Fashion Recommendation Service.ipynb
 SET MS_VC_REDIST_URL=https://aka.ms/vs/17/release/vs_BuildTools.exe
 SET GET_PIP_LOCATION=https://bootstrap.pypa.io/get-pip.py
+SET VIRTUALENV_NAME=fashion-kit-env
 SET ERROR_MSG=ERROR:There was an error while installing the kit
 SET LOG_REDIRECT_LOCATION=!WORKING_DIR!\log.txt 2>&1
 IF EXIST "!WORKING_DIR!\log.txt" (
@@ -119,8 +120,8 @@ IF ERRORLEVEL 1 (
 		   timeout 1  >nul
 		   for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
 			<nul set/p"=->!CR!"
-		   ECHO 2. A valid python is detected at system level hence skipping python installation
-			CALL :LOG "A valid python is detected at system level and hence installing dependent modules ..."
+		   ECHO 2. A valid python is detected at system level hence skipping python installation and proceeding with installing dependencies
+			CALL :LOG "A valid python is detected at system level"
 			CALL :Install_dependencies
 			IF ERRORLEVEL 1 (
 			   SET ERROR_MSG=ERROR: While installing python !PY_VERSION! in !PY_LOCATION!
@@ -138,12 +139,13 @@ EXIT /B 0
 
 :Download_repo
 IF EXIST !WORKING_DIR!\%EXTRACTED_REPO_DIR%\ (
-    CALL :LOG "%REPO_NAME% already downloaded"
+    CALL :LOG "%REPO_NAME% already available in location"
 	 timeout 1  >nul
 	 for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
 	 <nul set/p"=->!CR!"
-	 ECHO 4. Repo already downloaded
+	 ECHO 4. Repo already available in the location !WORKING_DIR!. Please delete the repo and re run the script to download latest code.
 	 TITLE Installing %KIT_NAME% kit 100%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 ) ELSE (
     bitsadmin /transfer repo_download_job /download /priority foreground %REPO_DOWNLOAD_URL% "!WORKING_DIR!\%REPO_NAME%" >> !WORKING_DIR!\log.txt 2>&1
 	 CALL :LOG "Repo downloaded successfully"
@@ -154,8 +156,6 @@ IF EXIST !WORKING_DIR!\%EXTRACTED_REPO_DIR%\ (
 	ECHO 4. Repo installed
     CALL :LOG "Extracting the repo ..."
     tar -xvf %REPO_NAME% >> !WORKING_DIR!\log.txt 2>&1
-    TITLE Installing %KIT_NAME% kit 90%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx__________
-	CALL :Download_image
     TITLE Installing %KIT_NAME% kit 100%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     timeout 1  >nul
 	for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
@@ -163,21 +163,6 @@ IF EXIST !WORKING_DIR!\%EXTRACTED_REPO_DIR%\ (
 	ECHO 5. Repo extracted
 )
 EXIT /B 0	
-
-:Download_image
-CALL :LOG "Downloading Image source ... "
-cd %EXTRACTED_REPO_DIR%
-REM bitsadmin /transfer python_download_job /download  https://kandi.dev/owassets/kandi1clickkits-model-assets/fashion-model-data.zip "%cd%\fashion-model-data.zip"
-curl https://kandi.dev/owassets/kandi1clickkits-model-assets/fashion-model-data.zip --output fashion-model-data.zip >> !WORKING_DIR!\log.txt 2>&1
-IF ERRORLEVEL 1 (
-	CALL :LOG "Error with Downloading Image source ... "
-    EXIT /B 1
-)
-tar -xvf "fashion-model-data.zip" >> !WORKING_DIR!\log.txt 2>&1
-del fashion-model-data.zip
-cd ..
-CALL :LOG "Download completed Image source ... "
-EXIT /B 0
 
 :Install_python_and_modules
 CALL :LOG "Downloading python %PY_VERSION% ... "
@@ -224,7 +209,7 @@ IF ERRORLEVEL 1 (
 		timeout 1  >nul
 		for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
 		<nul set/p"=->!CR!"
-		ECHO 2. python version !PY_VERSION! installed
+		ECHO 2. python version !PY_VERSION! installed and proceeding with installing dependencies
 		CALL :Install_dependencies
 		IF ERRORLEVEL 1 (
 			EXIT /B 1
@@ -265,10 +250,10 @@ CALL :LOG "Installing dependent modules ..."
 bitsadmin /transfer dependency_download_job /download /priority foreground %REPO_DEPENDENCIES_URL% "!WORKING_DIR!\requirements.txt" >> !WORKING_DIR!\log.txt 2>&1
 CALL :LOG "!PATH!"
 python -m pip install virtualenv >> !WORKING_DIR!\log.txt 2>&1
-python -m virtualenv fashion-kit-env >> !WORKING_DIR!\log.txt 2>&1
+python -m virtualenv %VIRTUALENV_NAME%>> !WORKING_DIR!\log.txt 2>&1
 REM python -m venv kkit
 pushd .
-cd .\fashion-kit-env\Scripts
+cd .\%VIRTUALENV_NAME%\Scripts
 CALL :LOG "%cd%"
 CALL .\activate.bat
 popd
@@ -279,7 +264,7 @@ TITLE Installing %KIT_NAME% kit 60%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 timeout 1  >nul
 for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
 <nul set/p"=->!CR!"
-ECHO 3. Dependencies installed
+ECHO 3. Dependencies installed 
 EXIT /B 0
 
 :Show_Error_And_Exit

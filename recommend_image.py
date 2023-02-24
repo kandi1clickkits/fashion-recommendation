@@ -39,7 +39,7 @@ def feature_extraction(img_path, model):
 
 
 def recommend(features, feature_list):
-    neighbors = NearestNeighbors(n_neighbors=6, algorithm='brute', metric='euclidean')
+    neighbors = NearestNeighbors(n_neighbors=5, algorithm='brute', metric='euclidean')
     neighbors.fit(feature_list)
     distances, indices = neighbors.kneighbors([features])
     return indices
@@ -52,7 +52,6 @@ def recommend_image(uploaded_file):
         value = str()
         for i in indices[0]:
             img = Image.open(filenames[i])
-            img = img.convert('L')  # ie. convert to grayscale
             buffer = io.BytesIO()
             img.save(buffer, 'png')
             buffer.seek(0)
