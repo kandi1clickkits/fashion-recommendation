@@ -143,7 +143,7 @@ IF EXIST !WORKING_DIR!\%EXTRACTED_REPO_DIR%\ (
 	 timeout 1  >nul
 	 for /f %%A in ('copy /Z "%~dpf0" nul') do set "CR=%%A"
 	 <nul set/p"=->!CR!"
-	 ECHO 4. Repo already available in the location !WORKING_DIR!. Please delete the repo and re run the script to download latest code.
+	 ECHO 4. Repo already available in the location !WORKING_DIR!.
 	 TITLE Installing %KIT_NAME% kit 100%% xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ) ELSE (
